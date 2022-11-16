@@ -35,6 +35,24 @@
       "type": "component",
       "repeatable": false,
       "component": "layout.featured-course"
+    },
+    "postSelection": {
+      "displayName": "postSelection",
+      "type": "component",
+      "repeatable": false,
+      "component": "blog.post-selection"
+    },
+    "dynamicHomeSection": {
+      "type": "dynamiczone",
+      "components": [
+        "layout.newsletter-form",
+        "layout.mission"
+      ]
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "seo.seo-information"
     }
   }
 }
