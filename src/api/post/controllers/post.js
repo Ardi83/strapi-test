@@ -19,16 +19,23 @@ module.exports = createCoreController('api::post.post', ({ strapi }) => ({
   
     // Method 2: Wrapping a core action (leaves core logic in place)
     async find(ctx) {
-      // some custom logic here
-      ctx.query = { ...ctx.query, local: 'en' };
-  
-      // Calling the default core action
-      const { data, meta } = await super.find(ctx);
-  
-      // some more custom logic
-      meta.date = Date.now();
-  
-      return { data, meta };
+        
+        
+        const isRequestingNonPremium = ctx.query.filters && ctx.query.filters.premium === 'false';
+        if (ctx.state.user || isRequestingNonPremium) return await super.find(ctx);
+
+        const publicPosts = await strapi.service('api::post.post').findPublic(ctx.query);
+        const sanitizedPosts = await this.sanitizeOutput(publicPosts, ctx);
+        return this.transformResponse(sanitizedPosts);
+        
+        // const { query } = ctx;
+        // const filterdPosts = await strapi.service('api::post.post').find({
+        //     filters: { premium: false, ...query.filters },
+        //     ...query
+        // });
+
+        // const sanitizedPosts = await this.sanitizeOutput(filterdPosts, ctx);
+        // return this.transformResponse(sanitizedPosts);
     },
 
   
@@ -36,12 +43,22 @@ module.exports = createCoreController('api::post.post', ({ strapi }) => ({
     async findOne(ctx) {
       const { id } = ctx.params;
       const { query } = ctx;
-      console.log(ctx.query);
   
-      const entity = await strapi.service('api::post.post').findOne(id, query);
-      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+      const postIfPublic = await strapi.service('api::post.post').findOneIfPublic(id, query);
+      const sanitizedEntity = await this.sanitizeOutput(postIfPublic, ctx);
   
       return this.transformResponse(sanitizedEntity);
     },
-  
+
+    async likePostAction(ctx) {
+        const {query, params: { id: postId }} = ctx;
+        const { user: { id: userId } } = ctx.state;
+        const updatedPost = await strapi.service('api::post.post').likePost({
+            postId,
+            userId,
+            ...query
+        });
+        const sanitizedEntity = await this.sanitizeOutput(updatedPost, ctx);
+        return this.transformResponse(sanitizedEntity);
+    }  
 }));

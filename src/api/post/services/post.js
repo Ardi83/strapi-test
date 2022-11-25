@@ -30,9 +30,41 @@ module.exports = createCoreService('api::post.post', ({ strapi }) =>  ({
   
       return { results, pagination };
     },
+
+    async findPublic(args) {
+        const newQuery = {
+            ...args,
+            filters: {
+                ...args.filters,
+                premium: false
+            }
+        };
+
+        const publicPosts = await strapi.entityService.findMany('api::post.post', this.getFetchParams(newQuery));
+        return publicPosts;
+    },
   
     // Method 3: Replacing a core service
-    async findOne(entityId, params = {}) {
-      return strapi.entityService.findOne('api::post.post', entityId, this.getFetchParams(params));
+    async findOneIfPublic(entityId, query = {}) {
+        console.log(query)
+      const post = await strapi.entityService.findOne('api::post.post', entityId, this.getFetchParams(query));
+      return post.premium ? null : post;
+    },
+
+    async likePost(args) {
+        const { postId, userId, query } = args;
+
+        const selectedPost = await strapi.entityService.findOne('api::post.post', postId, {
+            populate: ['likedBy']
+        });
+
+        const updatedPost = await strapi.entityService.update('api::post.post', postId, {
+            data: {
+                likedBy: [ ...selectedPost.likedBy, userId ],
+            },
+            ...query
+        });
+        return updatedPost;
     }
-  }));
+
+}));
