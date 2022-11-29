@@ -16,14 +16,14 @@ const config = {
     head: {
         favicon: test_favicon
     },
-    theme: {
-        colors: {
-            buttonPrimary600: '#32324D',
-            primary600: '#32324D',
-            buttonPrimary500: '#8E8EA9',
-            primary500: '#8E8EA9',
-        }
-    }
+    // theme: {
+    //     colors: {
+    //         buttonPrimary600: '#32324D',
+    //         primary600: '#32324D',
+    //         buttonPrimary500: '#8E8EA9',
+    //         primary500: '#8E8EA9',
+    //     }
+    // }
 };
 
 const bootstrap = (app) => {
