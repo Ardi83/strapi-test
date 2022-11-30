@@ -6,6 +6,4 @@ module.exports = ({ env }) => ({
         salt: env('API_TOKEN_SALT'),
     },
     url: '/dashboard',
-    host: 'localhost',
-    port: 8080,
 });
